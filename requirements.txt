@@ -12,10 +12,6 @@ matplotlib==3.7.1 --prefer-binary
 seaborn==0.13.2 --prefer-binary
 joblib==1.2.0
 
-
-
-
-
 # Requests
 requests==2.31.0
 

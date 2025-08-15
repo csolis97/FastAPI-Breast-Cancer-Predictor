@@ -6,9 +6,7 @@ services:
     autoDeploy: false
     buildCommand: |
       pip install --upgrade pip setuptools wheel
-      pip install "cython<3"
-      pip install --prefer-binary --no-build-isolation scikit-learn==1.2.2
-      pip install .
+      pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
 
   

@@ -4,6 +4,9 @@ services:
     runtime: python-3.11.9
     plan: free
     autoDeploy: false
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
     buildCommand: |
       pip install --upgrade pip setuptools wheel
       pip install -r requirements.txt

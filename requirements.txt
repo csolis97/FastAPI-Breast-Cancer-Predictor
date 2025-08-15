@@ -5,12 +5,16 @@ aiofiles==24.1.0
 jinja2==3.1.6
 
 # ML & Data
-scikit-learn==1.2.2
+scikit-learn==1.2.2 --prefer-binary
+numpy==1.24.4 --prefer-binary
+pandas==2.0.3 --prefer-binary
+matplotlib==3.7.1 --prefer-binary
+seaborn==0.13.2 --prefer-binary
 joblib==1.2.0
-pandas==2.0.3
-numpy==1.24.4
-matplotlib==3.7.1
-seaborn==0.13.2
+
+
+
+
 
 # Requests
 requests==2.31.0

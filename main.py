@@ -7,6 +7,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "models", "model.pkl")
 scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
+
 print("BASE_DIR =", BASE_DIR)
 print("model_path =", model_path)
 print("scaler_path =", scaler_path)
@@ -17,12 +18,12 @@ try:
     model = joblib.load(model_path)
     scaler = joblib.load(scaler_path)
 except FileNotFoundError:
-    print("Error: scaler.pkl o modelo.pkl no encontrados.")
+    print("Error: scaler.pkl o model.pkl no encontrados.")
     model = None
     scaler = None
 
 app = FastAPI()
-# Definición del modelo de entrada con campos example media real
+
 class InputData(BaseModel):
     mean_radius: float = Field(..., example=14.127292)
     mean_texture: float = Field(..., example=19.289649)
@@ -62,7 +63,7 @@ class InputData(BaseModel):
         if v > 9999:
             raise ValueError('Valor atípico detectado: 9999 no es válido')
         return v
-    
+
 @app.get("/")
 def read_root():
     return {"message": "API funcionando. Usar POST /predict para hacer predicciones."}
@@ -110,11 +111,11 @@ def predict(data: InputData):
 
         # Predicción
         prediction = model.predict(features_scaled)
-        pred_proba = model.predict_proba(features_scaled)[:,1] # Probabilidad de clase positiva
+        pred_proba = model.predict_proba(features_scaled)[:, 1]  # Probabilidad clase positiva
 
         return {
             "prediction": int(prediction[0]),
-            "probability": float(pred_proba[0])
+            "probability": float(pred_proba)
         }
 
     except ValueError as e:

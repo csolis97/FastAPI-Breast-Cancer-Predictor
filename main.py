@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+from fastapi.exception_handlers import RequestValidationError
 from pydantic import BaseModel, Field, validator
 import joblib
 import numpy as np
@@ -8,22 +10,41 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(BASE_DIR, "models", "model.pkl")
 scaler_path = os.path.join(BASE_DIR, "models", "scaler.pkl")
 
-print("BASE_DIR =", BASE_DIR)
-print("model_path =", model_path)
-print("scaler_path =", scaler_path)
-print("¿Existe model_path?", os.path.exists(model_path))
-print("¿Existe scaler_path?", os.path.exists(scaler_path))
-
-try:
-    model = joblib.load(model_path)
-    scaler = joblib.load(scaler_path)
-except FileNotFoundError:
-    print("Error: scaler.pkl o model.pkl no encontrados.")
-    model = None
-    scaler = None
-
 app = FastAPI()
 
+model = None
+scaler = None
+
+@app.on_event("startup")
+def load_model_and_scaler():
+    global model, scaler
+    try:
+        model = joblib.load(model_path)
+        scaler = joblib.load(scaler_path)
+    except FileNotFoundError:
+        raise RuntimeError("Modelos no encontrados al iniciar el servidor.")
+
+# --- Handler para errores de validación ---
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    mensajes = []
+    for error in exc.errors():
+        # Usamos el msg del ValueError lanzado en el validador
+        if error["type"] == "value_error":
+            mensajes.append(error["msg"])
+        else:
+            mensajes.append(error)
+    
+    return JSONResponse(
+        status_code=422,
+        content={
+            "message": "Validación fallida. Revisa los campos enviados.",
+            "detail": mensajes,
+            "body": exc.body,
+        },
+    )
+
+# --- Modelo con validaciones ---
 class InputData(BaseModel):
     mean_radius: float = Field(..., example=14.127292)
     mean_texture: float = Field(..., example=19.289649)
@@ -55,10 +76,12 @@ class InputData(BaseModel):
     worst_concave_points: float = Field(..., example=0.114606)
     worst_symmetry: float = Field(..., example=0.290076)
     worst_fractal_dimension: float = Field(..., example=0.083946)
-
-    @validator('*')
-    def values(cls, v):
-        if v < 0:
+    
+    @validator('*', pre=True)
+    def no_negativos(cls, v):
+        if v is None:
+            return v
+        if isinstance(v, (int, float)) and v < 0:
             raise ValueError('Los valores no pueden ser negativos')
         if v > 9999:
             raise ValueError('Valor atípico detectado: 9999 no es válido')
@@ -106,19 +129,15 @@ def predict(data: InputData):
             data.worst_fractal_dimension
         ]])
 
-        # Escalado
         features_scaled = scaler.transform(input_data)
 
-        # Predicción
         prediction = model.predict(features_scaled)
-        pred_proba = model.predict_proba(features_scaled)[:, 1]  # Probabilidad clase positiva
+        pred_proba = model.predict_proba(features_scaled)[:, 1]
 
         return {
             "prediction": int(prediction[0]),
             "probability": float(pred_proba)
         }
 
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Error en los datos: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error interno: {e}")

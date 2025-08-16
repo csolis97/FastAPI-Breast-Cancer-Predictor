@@ -2,6 +2,18 @@
 
 Este proyecto implementa una **API en FastAPI** que carga un modelo previamente entrenado y expone un endpoint `/predict` para realizar predicciones a partir de datos enviados en formato JSON.
 
+---
+## Estructura del repositorio
+
+```
+FastAPI-Breast-Cancer-Predictor/
+│── notebooks        # Fuente del modelo y simulador cliente
+│── models           # Modelo entrenado y scaler
+│── main.py          # Archivo principal de la API
+│── requirements.txt # Dependencias
+│── README.md        # Documentación completa
+```
+---
 ## Instalación y configuración local
 
 1. **Clonar este repositorio**:
@@ -20,21 +32,23 @@ cd "C:\Users\xx\Desktop\FastAPI-Breast-Cancer-Predictor"
 ```bash
 python -m venv venv
 ```
-4. **Activar el entorno virtual** - **Windows (CMD)**:
+4. **Activar el entorno virtual**:
 
 ```bash
 venv\Scripts\activate.bat
 ```
 5. **Instalar las dependencias**:
+
 ```bash
 pip install -r requirements.txt
 ```
 5. **Iniciar el servidor local**:
+
 ```bash
 uvicorn main:app --reload
 ```
-
-6. **Abrir en el navegador**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+El servicio quedará disponible en:\
+`http://127.0.0.1:8000`
 
 ---
 
@@ -43,10 +57,6 @@ uvicorn main:app --reload
 ### **Método:**
 
 `POST`
-
-### **URL local:**
-
-`http://127.0.0.1:8000/predict`
 
 ### **JSON de entrada esperado**:
 
@@ -93,17 +103,17 @@ uvicorn main:app --reload
     "probabilidad": 0.5332673580926112
 }
 ```
+###  Pruebas desde un cliente externo
 
----
-## Estructura del repositorio
+El repositorio incluye un notebook (`notebooks/01_client.ipynb`) que
+realiza al menos **3 peticiones distintas** a la API, mostrando los
+datos enviados y los resultados obtenidos.
 
-```
-Tarea2/
-│── main.py          # Archivo principal de la API
-│── modelo.pkl       # Modelo entrenado
-│── requirements.txt # Dependencias
-│── README.md        # Documentación completa
-```
+También puedes crear tus propias pruebas con `requests` en Python o
+Postman.
+
+### API desplegada en Render
+🌐 <https://fastapi-breast-cancer-predictor-uyv6.onrender.com/docs>
 
 ---
 ## Autor

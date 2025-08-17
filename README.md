@@ -59,6 +59,7 @@ El servicio quedará disponible en:\
 `POST`
 
 ### **JSON de entrada esperado**:
+Cada campo corresponde a un atributo del tumor. Todos son de tipo float positivo.  
 
 ```json
 {
